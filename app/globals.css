@@ -723,3 +723,118 @@ body::after {
     transition: none;
   }
 }
+
+/* ── About Section ── */
+#about.section-shell {
+  min-height: 85vh !important;
+}
+
+#about .section-fade-enter {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 700ms ease, transform 700ms ease;
+}
+
+#about .section-fade-enter.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.about-inner {
+  position: relative;
+  z-index: 10;
+  width: min(100%, 1400px);
+  margin: 0 auto;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 55fr 45fr;
+  align-items: center;
+  gap: clamp(48px, 6vw, 96px);
+}
+
+.about-content {
+  width: 100%;
+  max-width: 620px;
+  padding: 1px 0;
+}
+
+.about-panel {
+  width: 100%;
+  max-width: 620px;
+  padding: 40px;
+}
+
+.about-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.about-row:last-child {
+  border-bottom: none;
+}
+
+.about-label {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.about-value {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  text-align: right;
+  opacity: 0.85;
+}
+
+.about-code-block {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  background: rgba(0, 0, 0, 0.4);
+  color: #c8102e;
+  border: 1px solid rgba(200, 16, 46, 0.2);
+}
+
+:root[data-theme="light"] .about-row {
+  border-color: rgba(10, 27, 68, 0.08);
+}
+
+:root[data-theme="light"] .about-value {
+  color: #222;
+  opacity: 1;
+}
+
+:root[data-theme="light"] .about-label {
+  color: #555;
+}
+
+:root[data-theme="light"] .about-code-block {
+  background: rgba(10, 27, 68, 0.03);
+  color: #8b0d1f;
+  border-color: rgba(179, 0, 34, 0.15);
+}
+
+@media (max-width: 1024px) {
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+
+  .about-content,
+  .about-panel {
+    max-width: 100%;
+  }
+
+  .about-panel {
+    padding: 32px;
+  }
+}

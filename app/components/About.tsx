@@ -1,40 +1,67 @@
 export default function About() {
   return (
-    <section id="about" className="section-shell section-fade-enter flex items-center">
-      <div className="section-inner">
-        <div className="grid items-start gap-8 lg:grid-cols-[0.8fr_1fr]">
-          <div className="content-column">
-            <p className="section-label">About</p>
-            <h2 className="section-title">Engineer Profile</h2>
-            <p className="fine-text mt-6">
+    <section id="about" className="section-shell flex items-center" style={{ minHeight: "85vh" }}>
+      <div className="about-inner">
+        <div className="about-grid">
+          {/* Left: content */}
+          <div className="about-content section-fade-enter">
+            <p className="section-label">ABOUT</p>
+            <h2 className="section-title">ENGINEER PROFILE</h2>
+            <p className="fine-text mt-6" style={{ maxWidth: "620px", lineHeight: 1.9 }}>
               I build backends that do more than serve data. My work focuses on the
               intersection of distributed systems and machine intelligence, including
               RAG architectures, vector databases, semantic search, and multi-tenant
               enterprise platforms.
             </p>
           </div>
-          <div className="panel panel-red exhibit-card relative p-7">
-            <div className="absolute left-[-1px] top-[-1px] h-4 w-4 border-l-2 border-t-2 border-exhibit-red" />
-            <div className="absolute bottom-[-1px] right-[-1px] h-4 w-4 border-b-2 border-r-2 border-exhibit-red" />
+
+          {/* Right: profile panel */}
+          <div className="about-panel panel panel-red exhibit-card section-fade-enter relative transition-all duration-300 hover:-translate-y-1">
+            {/* 4 corner bracket points */}
+            <div className="absolute left-[-1px] top-[-1px] h-5 w-5 border-l-2 border-t-2 border-exhibit-red" />
+            <div className="absolute right-[-1px] top-[-1px] h-5 w-5 border-r-2 border-t-2 border-exhibit-red" />
+            <div className="absolute bottom-[-1px] left-[-1px] h-5 w-5 border-b-2 border-l-2 border-exhibit-red" />
+            <div className="absolute bottom-[-1px] right-[-1px] h-5 w-5 border-b-2 border-r-2 border-exhibit-red" />
+            
+            {/* Header with tiny status dot indicator */}
+            <div className="flex items-center justify-between border-b border-exhibit-red/15 pb-4 mb-4">
+              <span className="font-display text-[10px] font-bold uppercase tracking-[0.24em] text-exhibit-red">SYSTEM // PROFILE</span>
+              <div className="flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-exhibit-red animate-pulse" />
+                <span className="font-mono text-[9px] uppercase tracking-wider text-exhibit-red/60">ONLINE</span>
+              </div>
+            </div>
+
+            {/* Profile rows */}
             {[
-              ["Name", "ALLURI JESWANTH JOEL"],
-              ["Institute", "IIIT Kottayam, Kerala"],
-              ["Program", "B.Tech CSE"],
-              ["Period", "Nov 2022 - May 2026"],
-              ["Certification", "Google Cloud Study Jam 2023"],
-              ["Certification", "AlgoUniversity Graph Camp 2024"],
-              ["Focus", "AI systems, backend architecture, full-stack products"],
+              ["NAME", "ALLURI JESWANTH JOEL"],
+              ["INSTITUTE", "IIIT Kottayam, Kerala"],
+              ["PROGRAM", "B.Tech CSE"],
+              ["PERIOD", "Nov 2022 — May 2026"],
             ].map(([label, value]) => (
-              <div
-                className="flex items-baseline justify-between gap-6 border-b border-white/5 py-3"
-                key={`${label}-${value}`}
-              >
-                <span className="font-display text-[0.68rem] uppercase tracking-[0.28em] text-exhibit-muted">
-                  {label}
-                </span>
-                <span className="text-right text-sm text-exhibit-silver">{value}</span>
+              <div className="about-row" key={label}>
+                <span className="about-label">{label}</span>
+                <span className="about-value">{value}</span>
               </div>
             ))}
+
+            {/* Code/JSON Row */}
+            <div className="mt-5">
+              <span className="about-label mb-2 block">CERTIFICATE / CODE</span>
+              <pre className="about-code-block font-mono text-[10.5px] leading-relaxed p-4 rounded bg-black/40 border border-exhibit-red/10 overflow-x-auto select-all">
+{`{
+  "certifications": [
+    "Google Cloud Study Jam 2023",
+    "AlgoUniversity Graph Camp 2024"
+  ],
+  "focus": [
+    "AI Systems",
+    "Backend Architecture",
+    "Distributed Systems"
+  ]
+}`}
+              </pre>
+            </div>
           </div>
         </div>
       </div>
