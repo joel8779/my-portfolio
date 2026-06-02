@@ -3,9 +3,10 @@
 import { Environment } from "@react-three/drei";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { motion, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
-import { Suspense, useMemo, useRef } from "react";
+import { Suspense, useMemo, useRef, useEffect } from "react";
 import type { Group } from "three";
 import { Color, MathUtils } from "three";
+import { audio } from "../lib/audio";
 
 type MechPose = {
   cameraY: number;
@@ -241,11 +242,18 @@ export default function FixedExhibit({ finish = "dark" }: Pick<RobotProps, "fini
   const cameraY = useTransform(scrollYProgress, [0, 1], [-0.2, -0.12]);
   const cameraZ = useTransform(scrollYProgress, [0, 1], [9.8, 10.3]);
 
+  const lastRotateRef = useRef(-0.08);
+  const lastProgressRef = useRef(0);
+
   useMotionValueEvent(y, "change", (value) => {
     pose.figureY = value;
   });
   useMotionValueEvent(rotateY, "change", (value) => {
     pose.rotationY = value;
+    if (Math.abs(value - lastRotateRef.current) > 0.05) {
+      lastRotateRef.current = value;
+      audio?.play("robotClick", 0.05);
+    }
   });
   useMotionValueEvent(cameraY, "change", (value) => {
     pose.cameraY = value;
@@ -253,6 +261,21 @@ export default function FixedExhibit({ finish = "dark" }: Pick<RobotProps, "fini
   useMotionValueEvent(cameraZ, "change", (value) => {
     pose.cameraZ = value;
   });
+  useMotionValueEvent(scrollYProgress, "change", (value) => {
+    if (Math.abs(value - lastProgressRef.current) > 0.08) {
+      lastProgressRef.current = value;
+      audio?.play("robotHydraulic", 0.05);
+    }
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (scrollYProgress.get() < 0.05) {
+        audio?.play("robotIdle", 0.01);
+      }
+    }, 8000);
+    return () => clearInterval(timer);
+  }, [scrollYProgress]);
 
   return (
     <motion.div

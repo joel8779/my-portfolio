@@ -1,5 +1,7 @@
 "use client";
 
+import { audio } from "../lib/audio";
+
 const RESUME_URL = "/resume/Alluri_Jeswanth_Joel_Resume.pdf";
 
 export default function ResumeButton() {
@@ -17,7 +19,11 @@ export default function ResumeButton() {
       href={RESUME_URL}
       download="Alluri_Jeswanth_Joel_Resume.pdf"
       title="Download Resume"
-      onClick={handleClick}
+      onClick={(e) => {
+        audio?.play("resumeDownload");
+        handleClick(e);
+      }}
+      onMouseEnter={() => audio?.play("uiHover")}
     >
       Resume
     </a>

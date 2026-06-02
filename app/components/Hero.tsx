@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 import ResumeButton from "./ResumeButton";
 
+import { audio } from "../lib/audio";
+
 const titleLines = ["ALLURI", "JESWANTH", "JOEL"];
 
 function AnimatedLine({ line, offset }: { line: string; offset: number }) {
@@ -47,6 +49,8 @@ export default function Hero() {
             <a
               className="cta-btn clip-corners inline-flex items-center justify-center bg-exhibit-blue px-5 py-3 font-display text-xs font-bold uppercase tracking-[0.22em] text-[var(--text-primary)] transition hover:bg-exhibit-blueDark"
               href="#projects"
+              onClick={() => audio?.play("servoStart")}
+              onMouseEnter={() => audio?.play("uiHover")}
             >
               Featured Projects
             </a>

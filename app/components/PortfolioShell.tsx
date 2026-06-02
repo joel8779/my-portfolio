@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Volume2, VolumeX } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import About from "./About";
 import BootSequence from "./BootSequence";
 import Contact from "./Contact";
@@ -11,6 +11,7 @@ import CustomCursor from "./CustomCursor";
 import FixedExhibit from "./FixedExhibit";
 import Hero from "./Hero";
 import Skills from "./Skills";
+import { audio } from "../lib/audio";
 
 const FeaturedProjects = dynamic(() => import("./FeaturedProjects"), {
   loading: () => (
@@ -48,196 +49,75 @@ const navItems = [
 
 type ThemeMode = "dark" | "light";
 
-type AudioEngine = {
-  ambient?: OscillatorNode;
-  context: AudioContext;
-  master: GainNode;
-};
-
-type AudioWindow = Window &
-  typeof globalThis & {
-    webkitAudioContext?: typeof AudioContext;
-  };
-
-/* ── Howler SFX (lazy) ── */
-function useHowlerSfx(enabled: boolean) {
-  const howlsRef = useRef<Record<string, { play: () => void }>>({});
-  const loadedRef = useRef(false);
-
-  const loadSounds = useCallback(() => {
-    if (loadedRef.current || typeof window === "undefined") return;
-    loadedRef.current = true;
-
-    import("howler").then(({ Howl }) => {
-      const defs: Record<string, { src: string; volume: number }> = {
-        hoverSoft: { src: "/sfx/hover-soft.mp3", volume: 0.18 },
-        clickTech: { src: "/sfx/click-tech.mp3", volume: 0.18 },
-        scrollPass: { src: "/sfx/scroll-pass.mp3", volume: 0.05 },
-        themeToggle: { src: "/sfx/theme-toggle.mp3", volume: 0.18 },
-        resumeDownload: { src: "/sfx/resume-download.mp3", volume: 0.18 },
-        boot: { src: "/sfx/boot.mp3", volume: 0.18 },
-      };
-
-      for (const [key, def] of Object.entries(defs)) {
-        howlsRef.current[key] = new Howl({
-          src: [def.src],
-          volume: def.volume,
-          preload: true,
-        });
-      }
-    });
-  }, []);
-
-  const play = useCallback(
-    (name: string, volumeOverride?: number) => {
-      if (!enabled) return;
-      const h = howlsRef.current[name];
-      if (h) {
-        if (volumeOverride !== undefined) {
-          (h as unknown as { volume: (v: number) => void }).volume(volumeOverride);
-        }
-        h.play();
-      }
-    },
-    [enabled],
-  );
-
-  return { loadSounds, play };
-}
-
-/* ── Web Audio oscillator engine (boot sequence tones) ── */
-function useExhibitAudio(enabled: boolean) {
-  const engineRef = useRef<AudioEngine | null>(null);
-
-  const ensureAudio = useCallback(() => {
-    if (typeof window === "undefined") return null;
-    if (!engineRef.current) {
-      const audioWindow = window as AudioWindow;
-      const AudioContextConstructor = audioWindow.AudioContext || audioWindow.webkitAudioContext;
-      if (!AudioContextConstructor) return null;
-      const context = new AudioContextConstructor();
-      const master = context.createGain();
-      master.gain.value = 0.18;
-      master.connect(context.destination);
-      engineRef.current = { context, master };
-    }
-
-    return engineRef.current;
-  }, []);
-
-  const startAmbient = useCallback(() => {
-    if (!enabled) return;
-    const engine = ensureAudio();
-    if (!engine || engine.ambient) return;
-
-    const oscillator = engine.context.createOscillator();
-    const humGain = engine.context.createGain();
-    oscillator.type = "sine";
-    oscillator.frequency.value = 46;
-    humGain.gain.value = 0.18;
-    oscillator.connect(humGain);
-    humGain.connect(engine.master);
-    oscillator.start();
-    engine.ambient = oscillator;
-  }, [enabled, ensureAudio]);
-
-  const playTone = useCallback(
-    (frequency: number, duration: number, type: OscillatorType = "triangle") => {
-      if (!enabled) return;
-      const engine = ensureAudio();
-      if (!engine) return;
-
-      void engine.context.resume();
-      const now = engine.context.currentTime;
-      const oscillator = engine.context.createOscillator();
-      const gain = engine.context.createGain();
-
-      oscillator.type = type;
-      oscillator.frequency.setValueAtTime(frequency, now);
-      oscillator.frequency.exponentialRampToValueAtTime(Math.max(24, frequency * 0.55), now + duration);
-      gain.gain.setValueAtTime(0.001, now);
-      gain.gain.exponentialRampToValueAtTime(0.28, now + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-      oscillator.connect(gain);
-      gain.connect(engine.master);
-      oscillator.start(now);
-      oscillator.stop(now + duration + 0.03);
-    },
-    [enabled, ensureAudio],
-  );
-
-  useEffect(() => {
-    if (enabled) {
-      startAmbient();
-      return;
-    }
-
-    engineRef.current?.ambient?.stop();
-    if (engineRef.current) engineRef.current.ambient = undefined;
-  }, [enabled, startAmbient]);
-
-  useEffect(() => {
-    if (!enabled) return;
-
-    const resume = () => {
-      const engine = ensureAudio();
-      void engine?.context.resume();
-      startAmbient();
-    };
-
-    window.addEventListener("pointerdown", resume, { once: true });
-    return () => window.removeEventListener("pointerdown", resume);
-  }, [enabled, ensureAudio, startAmbient]);
-
-  return { playTone, startAmbient };
-}
-
-/* ── Section reveal on scroll ── */
+/* ── Section reveal on scroll & Audio Triggers ── */
 function useSectionReveal(bootComplete: boolean) {
   useEffect(() => {
     if (!bootComplete || typeof window === "undefined") return;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
 
-    const sections = document.querySelectorAll(".section-fade-enter");
-    if (!sections.length) return;
-
-    const observer = new IntersectionObserver(
+    // Reveal elements with section-fade-enter
+    const revealObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
+            revealObserver.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.08 },
+      { threshold: 0.08 }
     );
 
-    sections.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [bootComplete]);
-}
+    document.querySelectorAll(".section-fade-enter").forEach((el) => {
+      revealObserver.observe(el);
+    });
 
-/* ── Scroll SFX (servo every 800px) ── */
-function useScrollSfx(enabled: boolean, play: (name: string, vol?: number) => void) {
-  const lastTickRef = useRef(0);
+    // Spacing transitions and Sound triggers for sections
+    const sections = document.querySelectorAll("section");
+    const sectionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const id = entry.target.id;
+            if (id === "projects") audio?.play("repoScan");
+            if (id === "repos") audio?.play("repoScan", 0.08);
+            if (id === "skills") audio?.play("themeShift", 0.08);
+            if (id === "about") audio?.play("bootHum", 0.1);
+            if (id === "contact") audio?.play("uiHover", 0.12);
+            sectionObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.08 }
+    );
 
-  useEffect(() => {
-    if (!enabled) return;
+    sections.forEach((s) => sectionObserver.observe(s));
 
-    const handleScroll = () => {
-      const y = window.scrollY;
-      const tick = Math.floor(y / 800);
-      if (tick !== lastTickRef.current && tick > 0) {
-        lastTickRef.current = tick;
-        play("scrollPass", 0.05);
-      }
+    // Footer observer for shutdown sound
+    const footer = document.querySelector(".global-footer");
+    let footerObserver: IntersectionObserver | null = null;
+    if (footer) {
+      footerObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              audio?.playOnceFooter();
+              footerObserver?.disconnect();
+            }
+          });
+        },
+        { threshold: 0.05 }
+      );
+      footerObserver.observe(footer);
+    }
+
+    return () => {
+      revealObserver.disconnect();
+      sectionObserver.disconnect();
+      footerObserver?.disconnect();
     };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [enabled, play]);
+  }, [bootComplete]);
 }
 
 export default function PortfolioShell() {
@@ -248,44 +128,35 @@ export default function PortfolioShell() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [themeMode, setThemeMode] = useState<ThemeMode>("dark");
   const [themeFlash, setThemeFlash] = useState(false);
-  const { playTone, startAmbient } = useExhibitAudio(soundEnabled);
-  const { loadSounds, play: playSfx } = useHowlerSfx(soundEnabled);
 
   const robotFinish = themeMode === "light" ? "light" : "dark";
   const canReveal = reduceMotion || (minimumElapsed && robotReady);
 
   useSectionReveal(bootComplete);
-  useScrollSfx(soundEnabled, playSfx);
 
-  /* Persist mute state */
+  // Sync sound setting on load
   useEffect(() => {
-    const saved = window.localStorage.getItem("portfolio-sound-muted");
-    if (saved === "true") setSoundEnabled(false);
+    if (audio) {
+      setSoundEnabled(!audio.isMuted());
+    }
   }, []);
 
   const toggleSound = useCallback(() => {
-    setSoundEnabled((current) => {
-      const next = !current;
-      window.localStorage.setItem("portfolio-sound-muted", String(!next));
-      return next;
-    });
+    if (audio) {
+      const nextMuted = audio.toggleMute();
+      setSoundEnabled(!nextMuted);
+      if (!nextMuted) {
+        audio.play("uiClick");
+      }
+    }
   }, []);
 
   const toggleTheme = useCallback(() => {
-    playSfx("themeToggle");
+    audio?.play("themeShift");
     setThemeFlash(true);
     setTimeout(() => setThemeFlash(false), 400);
     setThemeMode((current) => (current === "dark" ? "light" : "dark"));
-  }, [playSfx]);
-
-  const handleBootStage = useCallback(
-    (stage: number) => {
-      if (stage === 0) playTone(144, 0.08, "sine");
-      if (stage === 1) playTone(220, 0.18, "sawtooth");
-      if (stage === 2) playTone(480, 0.06, "square");
-    },
-    [playTone],
-  );
+  }, []);
 
   useEffect(() => {
     const savedTheme = window.localStorage.getItem("portfolio-theme");
@@ -308,8 +179,25 @@ export default function PortfolioShell() {
 
     document.documentElement.classList.add("boot-lock");
     const timer = window.setTimeout(() => setMinimumElapsed(true), 3400);
+
+    // Trigger boot sequence sounds
+    const t1 = setTimeout(() => {
+      audio?.play("bootHum");
+    }, 800);
+
+    const t2 = setTimeout(() => {
+      audio?.play("servoStart");
+    }, 1400);
+
+    const t3 = setTimeout(() => {
+      audio?.play("metalLock");
+    }, 2000);
+
     return () => {
       window.clearTimeout(timer);
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.clearTimeout(t3);
       document.documentElement.classList.remove("boot-lock");
     };
   }, [reduceMotion]);
@@ -319,22 +207,24 @@ export default function PortfolioShell() {
 
     setBootComplete(true);
     document.documentElement.classList.remove("boot-lock");
-    startAmbient();
-    playSfx("boot");
-  }, [canReveal, startAmbient, playSfx]);
+  }, [canReveal]);
 
   /* Unlock Howler on first user interaction */
   useEffect(() => {
     const unlock = () => {
-      loadSounds();
+      audio?.unlock();
     };
     window.addEventListener("pointerdown", unlock, { once: true });
-    return () => window.removeEventListener("pointerdown", unlock);
-  }, [loadSounds]);
+    window.addEventListener("keydown", unlock, { once: true });
+    return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+    };
+  }, []);
 
   /* Nav hover / click SFX */
-  const handleNavHover = useCallback(() => playSfx("hoverSoft"), [playSfx]);
-  const handleNavClick = useCallback(() => playSfx("clickTech"), [playSfx]);
+  const handleNavHover = useCallback(() => audio?.play("uiHover"), []);
+  const handleNavClick = useCallback(() => audio?.play("uiClick"), []);
 
   const headerClass = useMemo(
     () =>
@@ -356,7 +246,7 @@ export default function PortfolioShell() {
             finish={robotFinish}
             isReady={bootComplete}
             onRobotReady={() => setRobotReady(true)}
-            onStage={handleBootStage}
+            onStage={() => {}}
             onToggleSound={toggleSound}
             soundEnabled={soundEnabled}
           />
@@ -410,7 +300,7 @@ export default function PortfolioShell() {
               className="nav-resume-glow cta-btn flex h-11 items-center justify-center border border-exhibit-red/45 px-4 font-display text-[0.68rem] font-bold uppercase tracking-[0.22em] text-exhibit-silver transition-all duration-200 hover:scale-[1.03] hover:border-exhibit-red hover:bg-exhibit-red/10 hover:text-[var(--text-primary)] active:scale-[0.97]"
               download="Alluri_Jeswanth_Joel_Resume.pdf"
               href="/resume/Alluri_Jeswanth_Joel_Resume.pdf"
-              onClick={() => playSfx("resumeDownload")}
+              onClick={() => audio?.play("resumeDownload")}
               onMouseEnter={handleNavHover}
               title="Download Resume"
             >

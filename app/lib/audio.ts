@@ -1,36 +1,76 @@
-import { Howl } from 'howler';
+import { Howl } from "howler";
 
-export type SoundName = 'boot' | 'hoverSoft' | 'clickTech' | 'scrollPass' | 'themeToggle' | 'resumeDownload';
+export type SoundName =
+  | "bootHum"
+  | "servoStart"
+  | "metalLock"
+  | "uiHover"
+  | "uiClick"
+  | "themeShift"
+  | "resumeDownload"
+  | "repoScan"
+  | "contactSuccess"
+  | "contactError"
+  | "footerEnd"
+  | "robotHydraulic"
+  | "robotClick"
+  | "robotIdle";
 
-const SOUND_MAP: Record<SoundName, string> = {
-  boot: '/sfx/boot.mp3',
-  hoverSoft: '/sfx/hover-soft.mp3',
-  clickTech: '/sfx/click-tech.mp3',
-  scrollPass: '/sfx/scroll-pass.mp3',
-  themeToggle: '/sfx/theme-toggle.mp3',
-  resumeDownload: '/sfx/resume-download.mp3',
+const SOUND_MAP: Record<SoundName, { src: string; volume: number }> = {
+  bootHum: { src: "/sfx/boot-hum.mp3", volume: 0.12 },
+  servoStart: { src: "/sfx/servo-start.mp3", volume: 0.14 },
+  metalLock: { src: "/sfx/metal-lock.mp3", volume: 0.15 },
+  uiHover: { src: "/sfx/ui-hover.mp3", volume: 0.08 },
+  uiClick: { src: "/sfx/ui-click.mp3", volume: 0.12 },
+  themeShift: { src: "/sfx/theme-shift.mp3", volume: 0.14 },
+  resumeDownload: { src: "/sfx/resume-download.mp3", volume: 0.18 },
+  repoScan: { src: "/sfx/repo-scan.mp3", volume: 0.12 },
+  contactSuccess: { src: "/sfx/contact-success.mp3", volume: 0.15 },
+  contactError: { src: "/sfx/contact-error.mp3", volume: 0.12 },
+  footerEnd: { src: "/sfx/footer-end.mp3", volume: 0.15 },
+  robotHydraulic: { src: "/sfx/repo-scan.mp3", volume: 0.05 },
+  robotClick: { src: "/sfx/ui-hover.mp3", volume: 0.05 },
+  robotIdle: { src: "/sfx/repo-scan.mp3", volume: 0.02 },
 };
-
-const MASTER_VOLUME = 0.18;
 
 class AudioManager {
   private sounds: Map<SoundName, Howl> = new Map();
-  private _muted: boolean;
-  private _unlocked = false;
+  private muted: boolean = true;
+  private unlocked: boolean = false;
+  private lastPlayTime: number = 0;
+  private lastRobotPlayTime: number = 0;
+  private wasFooterPlayed: boolean = false;
 
   constructor() {
-    this._muted = typeof window !== 'undefined'
-      ? window.localStorage.getItem('portfolio-sound-muted') === 'true'
-      : false;
+    if (typeof window !== "undefined") {
+      const isMobile = window.innerWidth < 768;
+      const savedMute = window.localStorage.getItem("portfolio-sound-muted");
+
+      // Default muted on mobile, respect localStorage otherwise
+      if (savedMute !== null) {
+        this.muted = savedMute === "true";
+      } else {
+        this.muted = isMobile;
+      }
+
+      // Preload boot-hum, servo-start, metal-lock only
+      this.preloadBootSounds();
+    }
+  }
+
+  private preloadBootSounds() {
+    this.getOrLoad("bootHum");
+    this.getOrLoad("servoStart");
+    this.getOrLoad("metalLock");
   }
 
   private getOrLoad(name: SoundName): Howl {
     let sound = this.sounds.get(name);
     if (!sound) {
       sound = new Howl({
-        src: [SOUND_MAP[name]],
-        volume: MASTER_VOLUME,
-        preload: false,
+        src: [SOUND_MAP[name].src],
+        volume: SOUND_MAP[name].volume,
+        preload: name === "bootHum" || name === "servoStart" || name === "metalLock",
       });
       this.sounds.set(name, sound);
     }
@@ -38,40 +78,63 @@ class AudioManager {
   }
 
   unlock() {
-    if (this._unlocked) return;
-    this._unlocked = true;
-    // Preload common sounds after first interaction
-    (['hoverSoft', 'clickTech'] as SoundName[]).forEach(name => {
-      this.getOrLoad(name).load();
-    });
+    if (this.unlocked) return;
+    this.unlocked = true;
   }
 
   play(name: SoundName, volumeOverride?: number) {
-    if (this._muted || !this._unlocked) return;
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
+    if (this.muted || !this.unlocked) return;
+
+    // Respect prefers-reduced-motion
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
+    const now = Date.now();
+
+    // Cooldown logic for robot hydraulic and clicks
+    if (name === "robotHydraulic" || name === "robotClick") {
+      if (now - this.lastRobotPlayTime < 1500) return; // 1.5s robot cooldown
+      this.lastRobotPlayTime = now;
+    } else {
+      // General 250ms cooldown for other UI interactions
+      if (now - this.lastPlayTime < 250) return;
+      this.lastPlayTime = now;
+    }
+
     const sound = this.getOrLoad(name);
-    if (sound.state() === 'unloaded') sound.load();
+    if (sound.state() === "unloaded") {
+      sound.load();
+    }
+
     const id = sound.play();
     if (volumeOverride !== undefined) {
       sound.volume(volumeOverride, id);
     }
   }
 
-  get muted() {
-    return this._muted;
+  playOnceFooter() {
+    if (this.wasFooterPlayed) return;
+    this.wasFooterPlayed = true;
+    this.play("footerEnd");
+  }
+
+  isMuted() {
+    return this.muted;
   }
 
   setMuted(muted: boolean) {
-    this._muted = muted;
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem('portfolio-sound-muted', String(muted));
+    this.muted = muted;
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem("portfolio-sound-muted", String(muted));
     }
   }
 
   toggleMute(): boolean {
-    this.setMuted(!this._muted);
-    return this._muted;
+    const nextMute = !this.muted;
+    this.setMuted(nextMute);
+    return nextMute;
   }
 }
 
-export const audio = typeof window !== 'undefined' ? new AudioManager() : null;
+export const audio = typeof window !== "undefined" ? new AudioManager() : null;

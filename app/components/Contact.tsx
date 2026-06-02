@@ -3,6 +3,7 @@
 import emailjs from "@emailjs/browser";
 import { Send } from "lucide-react";
 import { FormEvent, useState } from "react";
+import { audio } from "../lib/audio";
 
 export default function Contact() {
   const [status, setStatus] = useState<
@@ -47,6 +48,7 @@ export default function Contact() {
       form.reset();
 
       setStatus("sent");
+      audio?.play("contactSuccess");
 
       setTimeout(() => {
         setStatus("idle");
@@ -55,6 +57,7 @@ export default function Contact() {
       console.error("EMAIL ERROR:", err);
 
       setStatus("error");
+      audio?.play("contactError");
 
       setError(
         err instanceof Error
@@ -142,6 +145,8 @@ export default function Contact() {
                 type="submit"
                 disabled={status === "sending"}
                 className="clip-corners inline-flex items-center justify-center gap-2 bg-exhibit-red px-5 py-3 font-display text-xs font-bold uppercase tracking-[0.22em] text-white transition hover:bg-exhibit-redDark disabled:opacity-60"
+                onClick={() => audio?.play("uiClick")}
+                onMouseEnter={() => audio?.play("uiHover")}
               >
                 <Send size={15} />
 
