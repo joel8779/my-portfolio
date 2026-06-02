@@ -1,6 +1,6 @@
 export default function About() {
   return (
-    <section id="about" className="section-shell flex items-center" style={{ minHeight: "85vh" }}>
+    <section id="about" className="section-shell flex items-center" style={{ minHeight: "72vh" }}>
       <div className="about-inner">
         <div className="about-grid">
           {/* Left: content */}
@@ -16,7 +16,7 @@ export default function About() {
           </div>
 
           {/* Right: profile panel */}
-          <div className="about-panel panel panel-red exhibit-card section-fade-enter relative transition-all duration-300 hover:-translate-y-1">
+          <div className="about-panel panel panel-red exhibit-card section-fade-enter relative transition-all duration-300">
             {/* 4 corner bracket points */}
             <div className="absolute left-[-1px] top-[-1px] h-5 w-5 border-l-2 border-t-2 border-exhibit-red" />
             <div className="absolute right-[-1px] top-[-1px] h-5 w-5 border-r-2 border-t-2 border-exhibit-red" />
@@ -45,23 +45,30 @@ export default function About() {
               </div>
             ))}
 
-            {/* Code/JSON Row */}
-            <div className="mt-5">
-              <span className="about-label mb-2 block">CERTIFICATE / CODE</span>
-              <pre className="about-code-block font-mono text-[10.5px] leading-relaxed p-4 rounded bg-black/40 border border-exhibit-red/10 overflow-x-auto select-all">
-{`{
-  "certifications": [
-    "Google Cloud Study Jam 2023",
-    "AlgoUniversity Graph Camp 2024"
-  ],
-  "focus": [
-    "AI Systems",
-    "Backend Architecture",
-    "Distributed Systems"
-  ]
-}`}
-              </pre>
+            {/* Multi-value: Certifications */}
+            <div className="about-row items-start">
+              <span className="about-label mt-1">CERTIFICATIONS</span>
+              <div className="flex flex-col gap-1.5 items-end max-w-[70%] text-right">
+                {["Google Cloud Study Jam 2023", "AlgoUniversity Graph Camp 2024"].map((cert) => (
+                  <span key={cert} className="about-chip">
+                    {cert}
+                  </span>
+                ))}
+              </div>
             </div>
+
+            {/* Multi-value: Focus */}
+            <div className="about-row items-start">
+              <span className="about-label mt-1">FOCUS</span>
+              <div className="flex flex-col gap-1.5 items-end max-w-[70%] text-right">
+                {["AI Systems", "Backend Architecture", "Distributed Systems"].map((focus) => (
+                  <span key={focus} className="about-chip">
+                    {focus}
+                  </span>
+                ))}
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
