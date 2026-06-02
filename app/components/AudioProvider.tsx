@@ -39,7 +39,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     setIsMuted(initialMute);
     Howler.mute(initialMute);
     audio?.setMuted(initialMute);
-    console.log(`[AUDIO] ${initialMute ? "muted" : "unmuted"}`);
   }, []);
 
   const toggleMute = () => {
@@ -50,7 +49,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       Howler.mute(nextMuted);
       audio?.setMuted(nextMuted);
       window.localStorage.setItem("portfolio-sound-muted", String(nextMuted));
-      console.log(`[AUDIO] ${nextMuted ? "muted" : "unmuted"}`);
       return nextMuted;
     });
   };

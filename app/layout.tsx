@@ -16,9 +16,35 @@ const exo = Exo_2({
 });
 
 export const metadata: Metadata = {
-  title: "ALLURI JESWANTH JOEL | Portfolio",
+  title: "Alluri Jeswanth — Interactive Engineering Portfolio",
   description:
-    "Interactive engineering portfolio for ALLURI JESWANTH JOEL, full-stack and AI systems engineer.",
+    "Full-stack engineer building AI systems, backend architecture, semantic search and production experiences.",
+  metadataBase: new URL("https://allurijeswanth.vercel.app"),
+  openGraph: {
+    title: "Alluri Jeswanth — Interactive Engineering Portfolio",
+    description:
+      "Full-stack engineer building AI systems, backend architecture, semantic search and production experiences.",
+    url: "https://allurijeswanth.vercel.app",
+    siteName: "Alluri Jeswanth Portfolio",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Alluri Jeswanth — Interactive Engineering Portfolio",
+    description:
+      "Full-stack engineer building AI systems, backend architecture, semantic search and production experiences.",
+    creator: "@joel8779",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 const footerActions = [

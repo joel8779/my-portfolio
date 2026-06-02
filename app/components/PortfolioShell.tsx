@@ -5,14 +5,15 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import About from "./About";
-import BootSequence from "./BootSequence";
 import Contact from "./Contact";
 import CustomCursor from "./CustomCursor";
-import FixedExhibit from "./FixedExhibit";
 import Hero from "./Hero";
 import Skills from "./Skills";
 import { audio } from "../lib/audio";
 import { useAudio } from "./AudioProvider";
+
+const BootSequence = dynamic(() => import("./BootSequence"), { ssr: false });
+const FixedExhibit = dynamic(() => import("./FixedExhibit"), { ssr: false });
 
 const FeaturedProjects = dynamic(() => import("./FeaturedProjects"), {
   loading: () => (
