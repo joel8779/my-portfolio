@@ -25,9 +25,9 @@ export default function Hero() {
   let offset = 0;
 
   return (
-    <section id="home" className="section-shell hero-stage flex min-h-screen items-center">
+    <section id="home" className="section-shell hero-stage">
       <div className="section-inner">
-        <div className="content-column">
+        <div className="content-column hero-content">
           <p className="section-label">Interactive Engineering Portfolio</p>
           <h1 className="mt-5 max-w-[10ch] font-display text-[clamp(3.6rem,8vw,7.6rem)] font-bold uppercase leading-[0.82] tracking-0 text-exhibit-chrome drop-shadow-[0_24px_80px_rgba(0,0,0,0.55)]">
             {titleLines.map((line) => {
