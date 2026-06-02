@@ -737,6 +737,13 @@ body::after {
   }
 }
 
+/* ── Skills Section ── */
+#skills.section-shell {
+  min-height: auto !important;
+  padding-top: 96px !important;
+  padding-bottom: 96px !important;
+}
+
 /* ── About Section ── */
 #about.section-shell {
   min-height: 72vh !important;

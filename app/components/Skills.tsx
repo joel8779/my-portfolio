@@ -1,22 +1,22 @@
 const skillGroups = [
   {
-    title: "Languages",
+    title: "LANGUAGES",
     items: ["Python", "Java", "TypeScript", "JavaScript", "SQL", "C / C++", "R"],
   },
   {
-    title: "Backend",
+    title: "BACKEND",
     items: ["FastAPI", "Spring Boot 3", "Node.js / Express", "Flask", "LangChain", "Celery"],
   },
   {
-    title: "Frontend",
+    title: "FRONTEND",
     items: ["Next.js", "React", "Tailwind CSS", "Framer Motion"],
   },
   {
-    title: "Data & AI",
+    title: "DATA & AI",
     items: ["PostgreSQL", "MongoDB Atlas", "Redis", "Pinecone / Qdrant", "MLflow", "TensorFlow"],
   },
   {
-    title: "Infrastructure",
+    title: "INFRASTRUCTURE",
     items: ["Docker", "GitHub Actions", "GCP", "Vercel / Render", "PySpark"],
   },
 ];

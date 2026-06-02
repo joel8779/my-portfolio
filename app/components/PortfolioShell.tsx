@@ -193,9 +193,9 @@ function useExhibitAudio(enabled: boolean) {
 }
 
 /* ── Section reveal on scroll ── */
-function useSectionReveal() {
+function useSectionReveal(bootComplete: boolean) {
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (!bootComplete || typeof window === "undefined") return;
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReducedMotion) return;
 
@@ -216,7 +216,7 @@ function useSectionReveal() {
 
     sections.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [bootComplete]);
 }
 
 /* ── Scroll SFX (servo every 800px) ── */
@@ -254,7 +254,7 @@ export default function PortfolioShell() {
   const robotFinish = themeMode === "light" ? "light" : "dark";
   const canReveal = reduceMotion || (minimumElapsed && robotReady);
 
-  useSectionReveal();
+  useSectionReveal(bootComplete);
   useScrollSfx(soundEnabled, playSfx);
 
   /* Persist mute state */
