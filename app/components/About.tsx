@@ -7,6 +7,9 @@ export default function About() {
           <div className="about-content section-fade-enter">
             <p className="section-label">ABOUT</p>
             <h2 className="section-title">ENGINEER PROFILE</h2>
+            <p className="font-display text-xs font-semibold uppercase tracking-[0.24em] text-exhibit-red/85 mt-2">
+              Systems • Backend • AI
+            </p>
             <p className="fine-text mt-6" style={{ maxWidth: "620px", lineHeight: 1.9 }}>
               I build backends that do more than serve data. My work focuses on the
               intersection of distributed systems and machine intelligence, including

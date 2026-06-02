@@ -26,8 +26,8 @@ export default function Skills() {
     <section id="skills" className="section-shell section-fade-enter">
       <div className="section-inner">
         <div className="content-column right">
-          <p className="section-label">Technology Stack</p>
-          <h2 className="section-title">Core Capabilities</h2>
+          <p className="section-label">TECHNOLOGY STACK</p>
+          <h2 className="section-title">CORE CAPABILITIES</h2>
         </div>
         <div className="mt-10 grid grid-cols-1 gap-px bg-exhibit-blue/10 sm:grid-cols-2 lg:grid-cols-5">
           {skillGroups.map((group) => (

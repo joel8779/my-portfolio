@@ -383,11 +383,15 @@ body::after {
 
 .section-shell {
   min-height: auto;
-  padding: clamp(32px, 4vw, 64px) clamp(1.25rem, 5vw, 4.5rem);
+  padding-top: clamp(64px, 6vw, 96px);
+  padding-bottom: clamp(64px, 6vw, 96px);
+  padding-left: clamp(1.25rem, 5vw, 4.5rem);
+  padding-right: clamp(1.25rem, 5vw, 4.5rem);
   margin-top: clamp(48px, 5vw, 80px);
   margin-bottom: clamp(48px, 5vw, 80px);
   position: relative;
   isolation: isolate;
+  z-index: 10;
 }
 
 #home.section-shell {
@@ -762,7 +766,7 @@ body::after {
 
 .about-grid {
   display: grid;
-  grid-template-columns: 45fr 55fr;
+  grid-template-columns: 48fr 52fr;
   align-items: center;
   gap: clamp(48px, 6vw, 96px);
 }

@@ -257,7 +257,7 @@ export default function FixedExhibit({ finish = "dark" }: Pick<RobotProps, "fini
   return (
     <motion.div
       aria-hidden="true"
-      className="fixed bottom-0 right-[clamp(-40px,2vw,40px)] z-[5] h-screen w-[min(42vw,760px)] overflow-visible pointer-events-none max-lg:hidden"
+      className="fixed bottom-0 right-[clamp(-40px,2vw,40px)] z-0 h-screen w-[min(42vw,760px)] overflow-visible pointer-events-none max-lg:hidden"
       style={{
         filter: "drop-shadow(0 0 26px rgba(109, 183, 255, 0.2)) drop-shadow(0 0 18px rgba(179, 0, 34, 0.14))",
         opacity,
