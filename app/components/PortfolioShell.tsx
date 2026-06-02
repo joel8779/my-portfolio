@@ -2,10 +2,12 @@
 
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import About from "./About";
 import BootSequence from "./BootSequence";
 import Contact from "./Contact";
+import CustomCursor from "./CustomCursor";
 import FixedExhibit from "./FixedExhibit";
 import Hero from "./Hero";
 import Skills from "./Skills";
@@ -57,6 +59,53 @@ type AudioWindow = Window &
     webkitAudioContext?: typeof AudioContext;
   };
 
+/* ── Howler SFX (lazy) ── */
+function useHowlerSfx(enabled: boolean) {
+  const howlsRef = useRef<Record<string, { play: () => void }>>({});
+  const loadedRef = useRef(false);
+
+  const loadSounds = useCallback(() => {
+    if (loadedRef.current || typeof window === "undefined") return;
+    loadedRef.current = true;
+
+    import("howler").then(({ Howl }) => {
+      const defs: Record<string, { src: string; volume: number }> = {
+        hoverSoft: { src: "/sfx/hover-soft.mp3", volume: 0.18 },
+        clickTech: { src: "/sfx/click-tech.mp3", volume: 0.18 },
+        scrollPass: { src: "/sfx/scroll-pass.mp3", volume: 0.05 },
+        themeToggle: { src: "/sfx/theme-toggle.mp3", volume: 0.18 },
+        resumeDownload: { src: "/sfx/resume-download.mp3", volume: 0.18 },
+        boot: { src: "/sfx/boot.mp3", volume: 0.18 },
+      };
+
+      for (const [key, def] of Object.entries(defs)) {
+        howlsRef.current[key] = new Howl({
+          src: [def.src],
+          volume: def.volume,
+          preload: true,
+        });
+      }
+    });
+  }, []);
+
+  const play = useCallback(
+    (name: string, volumeOverride?: number) => {
+      if (!enabled) return;
+      const h = howlsRef.current[name];
+      if (h) {
+        if (volumeOverride !== undefined) {
+          (h as unknown as { volume: (v: number) => void }).volume(volumeOverride);
+        }
+        h.play();
+      }
+    },
+    [enabled],
+  );
+
+  return { loadSounds, play };
+}
+
+/* ── Web Audio oscillator engine (boot sequence tones) ── */
 function useExhibitAudio(enabled: boolean) {
   const engineRef = useRef<AudioEngine | null>(null);
 
@@ -143,6 +192,54 @@ function useExhibitAudio(enabled: boolean) {
   return { playTone, startAmbient };
 }
 
+/* ── Section reveal on scroll ── */
+function useSectionReveal() {
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReducedMotion) return;
+
+    const sections = document.querySelectorAll(".section-fade-enter");
+    if (!sections.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.08 },
+    );
+
+    sections.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, []);
+}
+
+/* ── Scroll SFX (servo every 800px) ── */
+function useScrollSfx(enabled: boolean, play: (name: string, vol?: number) => void) {
+  const lastTickRef = useRef(0);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const handleScroll = () => {
+      const y = window.scrollY;
+      const tick = Math.floor(y / 800);
+      if (tick !== lastTickRef.current && tick > 0) {
+        lastTickRef.current = tick;
+        play("scrollPass", 0.05);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [enabled, play]);
+}
+
 export default function PortfolioShell() {
   const reduceMotion = useReducedMotion();
   const [bootComplete, setBootComplete] = useState(false);
@@ -150,18 +247,36 @@ export default function PortfolioShell() {
   const [robotReady, setRobotReady] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [themeMode, setThemeMode] = useState<ThemeMode>("dark");
+  const [themeFlash, setThemeFlash] = useState(false);
   const { playTone, startAmbient } = useExhibitAudio(soundEnabled);
+  const { loadSounds, play: playSfx } = useHowlerSfx(soundEnabled);
 
   const robotFinish = themeMode === "light" ? "light" : "dark";
   const canReveal = reduceMotion || (minimumElapsed && robotReady);
 
+  useSectionReveal();
+  useScrollSfx(soundEnabled, playSfx);
+
+  /* Persist mute state */
+  useEffect(() => {
+    const saved = window.localStorage.getItem("portfolio-sound-muted");
+    if (saved === "true") setSoundEnabled(false);
+  }, []);
+
   const toggleSound = useCallback(() => {
-    setSoundEnabled((current) => !current);
+    setSoundEnabled((current) => {
+      const next = !current;
+      window.localStorage.setItem("portfolio-sound-muted", String(!next));
+      return next;
+    });
   }, []);
 
   const toggleTheme = useCallback(() => {
+    playSfx("themeToggle");
+    setThemeFlash(true);
+    setTimeout(() => setThemeFlash(false), 400);
     setThemeMode((current) => (current === "dark" ? "light" : "dark"));
-  }, []);
+  }, [playSfx]);
 
   const handleBootStage = useCallback(
     (stage: number) => {
@@ -205,7 +320,21 @@ export default function PortfolioShell() {
     setBootComplete(true);
     document.documentElement.classList.remove("boot-lock");
     startAmbient();
-  }, [canReveal, startAmbient]);
+    playSfx("boot");
+  }, [canReveal, startAmbient, playSfx]);
+
+  /* Unlock Howler on first user interaction */
+  useEffect(() => {
+    const unlock = () => {
+      loadSounds();
+    };
+    window.addEventListener("pointerdown", unlock, { once: true });
+    return () => window.removeEventListener("pointerdown", unlock);
+  }, [loadSounds]);
+
+  /* Nav hover / click SFX */
+  const handleNavHover = useCallback(() => playSfx("hoverSoft"), [playSfx]);
+  const handleNavClick = useCallback(() => playSfx("clickTech"), [playSfx]);
 
   const headerClass = useMemo(
     () =>
@@ -217,6 +346,10 @@ export default function PortfolioShell() {
 
   return (
     <>
+      <CustomCursor />
+
+      {themeFlash ? <div className="theme-flash-overlay" /> : null}
+
       <AnimatePresence>
         {!bootComplete && !reduceMotion ? (
           <BootSequence
@@ -244,9 +377,11 @@ export default function PortfolioShell() {
             <div className="hidden items-center gap-7 md:flex">
               {navItems.map(([label, href]) => (
                 <a
-                  className="font-display text-[0.68rem] font-semibold uppercase tracking-[0.25em] text-exhibit-muted transition hover:text-exhibit-red"
+                  className="nav-link font-display text-[0.68rem] font-semibold uppercase tracking-[0.25em] text-exhibit-muted transition hover:text-exhibit-red"
                   href={href}
                   key={href}
+                  onClick={handleNavClick}
+                  onMouseEnter={handleNavHover}
                 >
                   {label}
                 </a>
@@ -254,24 +389,29 @@ export default function PortfolioShell() {
             </div>
             <button
               aria-label="Toggle exhibit theme"
-              className="flex h-11 w-11 items-center justify-center border border-exhibit-blue/35 font-display text-lg text-exhibit-silver transition hover:border-exhibit-red hover:text-[var(--text-primary)]"
+              className="cta-btn flex h-11 w-11 items-center justify-center border border-exhibit-blue/35 font-display text-lg text-exhibit-silver transition hover:border-exhibit-red hover:text-[var(--text-primary)]"
               onClick={toggleTheme}
+              onMouseEnter={handleNavHover}
               title={themeMode === "dark" ? "Exhibit Light" : "Dark"}
               type="button"
             >
               ◐
             </button>
             <button
-              className="hidden h-11 items-center justify-center border border-exhibit-blue/35 px-3 font-display text-[0.62rem] font-bold uppercase tracking-[0.18em] text-exhibit-silver transition hover:border-exhibit-red hover:text-[var(--text-primary)] sm:flex"
+              aria-label={soundEnabled ? "Mute sound" : "Unmute sound"}
+              className="cta-btn hidden h-11 w-11 items-center justify-center border border-exhibit-blue/35 text-exhibit-silver transition hover:border-exhibit-red hover:text-[var(--text-primary)] sm:flex"
               onClick={toggleSound}
+              title={soundEnabled ? "Sound On" : "Sound Off"}
               type="button"
             >
-              Sound {soundEnabled ? "On" : "Off"}
+              {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
             </button>
             <a
-              className="flex h-11 items-center justify-center border border-exhibit-red/45 px-4 font-display text-[0.68rem] font-bold uppercase tracking-[0.22em] text-exhibit-silver transition-all duration-200 hover:scale-[1.03] hover:border-exhibit-red hover:bg-exhibit-red/10 hover:text-[var(--text-primary)] active:scale-[0.97]"
+              className="nav-resume-glow cta-btn flex h-11 items-center justify-center border border-exhibit-red/45 px-4 font-display text-[0.68rem] font-bold uppercase tracking-[0.22em] text-exhibit-silver transition-all duration-200 hover:scale-[1.03] hover:border-exhibit-red hover:bg-exhibit-red/10 hover:text-[var(--text-primary)] active:scale-[0.97]"
               download="Alluri_Jeswanth_Joel_Resume.pdf"
               href="/resume/Alluri_Jeswanth_Joel_Resume.pdf"
+              onClick={() => playSfx("resumeDownload")}
+              onMouseEnter={handleNavHover}
               title="Download Resume"
             >
               Resume

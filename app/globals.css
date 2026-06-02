@@ -563,3 +563,163 @@ body::after {
     background: rgba(12, 16, 24, 0.86);
   }
 }
+
+/* ── Custom Cursor ── */
+.custom-cursor-active,
+.custom-cursor-active * {
+  cursor: none !important;
+}
+
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  width: 28px;
+  height: 28px;
+  margin-left: -14px;
+  margin-top: -14px;
+  pointer-events: none;
+  border: 1.5px solid rgba(90, 155, 255, 0.45);
+  border-radius: 50%;
+  transition: width 200ms ease, height 200ms ease, margin 200ms ease,
+    border-color 200ms ease, background 200ms ease, box-shadow 200ms ease;
+  mix-blend-mode: difference;
+}
+
+.cursor-ring--expand {
+  width: 48px;
+  height: 48px;
+  margin-left: -24px;
+  margin-top: -24px;
+  border-color: rgba(200, 16, 46, 0.55);
+  background: rgba(200, 16, 46, 0.06);
+}
+
+.cursor-ring--robot {
+  border-color: rgba(90, 155, 255, 0.6);
+  box-shadow: 0 0 14px rgba(90, 155, 255, 0.25);
+  animation: cursor-robot-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes cursor-robot-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(90, 155, 255, 0.2); }
+  50% { box-shadow: 0 0 20px rgba(90, 155, 255, 0.4); }
+}
+
+/* ── Navbar link underline sweep ── */
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: #c8102e;
+  transition: width 280ms ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.nav-link--active {
+  color: #c8102e !important;
+  text-shadow: 0 0 12px rgba(200, 16, 46, 0.3);
+}
+
+/* ── Button interaction polish ── */
+.cta-btn {
+  transition: transform 200ms ease, box-shadow 200ms ease, background 200ms ease,
+    border-color 200ms ease, color 200ms ease;
+}
+
+.cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 18px rgba(200, 16, 46, 0.18);
+}
+
+.cta-btn:active {
+  transform: scale(0.97);
+}
+
+/* ── Project card 3D hover ── */
+.project-card-3d {
+  transition: transform 320ms ease, box-shadow 320ms ease;
+}
+
+.project-card-3d:hover {
+  transform: translateY(-8px) rotateX(2deg);
+  box-shadow:
+    0 18px 60px rgba(0, 0, 0, 0.35),
+    inset 0 0 0 1px rgba(90, 155, 255, 0.15),
+    0 0 18px rgba(90, 155, 255, 0.06);
+}
+
+/* ── Theme toggle flash ── */
+@keyframes theme-flash {
+  0% { opacity: 0; }
+  15% { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
+.theme-flash-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  background: white;
+  opacity: 0;
+  animation: theme-flash 350ms ease-out forwards;
+}
+
+/* ── Navbar resume glow ── */
+.nav-resume-glow:hover {
+  box-shadow: 0 0 16px rgba(200, 16, 46, 0.25), 0 0 4px rgba(200, 16, 46, 0.15);
+}
+
+/* ── Section enter animation ── */
+.section-fade-enter {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 700ms ease, transform 700ms ease;
+}
+
+.section-fade-enter.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Touch devices: restore cursor ── */
+@media (pointer: coarse) {
+  .custom-cursor-active,
+  .custom-cursor-active * {
+    cursor: auto !important;
+  }
+
+  .cursor-ring {
+    display: none;
+  }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .cursor-ring,
+  .theme-flash-overlay {
+    display: none !important;
+  }
+
+  .project-card-3d:hover {
+    transform: none;
+  }
+
+  .section-fade-enter {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

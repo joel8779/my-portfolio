@@ -6,7 +6,7 @@ import type { GitHubPortfolioData, Repository } from "../types";
 
 function ProjectCard({ repo, index }: { repo: Repository; index: number }) {
   return (
-    <article className="panel panel-red exhibit-card relative flex flex-col p-7 transition-transform duration-300 hover:-translate-y-1.5 hover:bg-exhibit-panel2/90">
+    <article className="panel panel-red exhibit-card project-card-3d relative flex flex-col p-7 hover:bg-exhibit-panel2/90">
       <p className="font-display text-xs font-bold uppercase tracking-[0.28em] text-exhibit-red/60">
         Project {String(index + 1).padStart(2, "0")}
       </p>
