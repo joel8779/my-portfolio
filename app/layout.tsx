@@ -56,7 +56,7 @@ const footerActions = [
   },
   {
     label: "LinkedIn",
-    href: "https://linkedin.com/in/jeswanth-joel-alluri-3aa5b8295",
+    href: "https://www.linkedin.com/in/jeswanthjoelalluri",
     icon: Linkedin,
     external: true,
   },
