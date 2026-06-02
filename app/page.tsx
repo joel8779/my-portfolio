@@ -1,5 +1,10 @@
+import { AudioProvider } from "./components/AudioProvider";
 import PortfolioShell from "./components/PortfolioShell";
 
 export default function Page() {
-  return <PortfolioShell />;
+  return (
+    <AudioProvider>
+      <PortfolioShell />
+    </AudioProvider>
+  );
 }

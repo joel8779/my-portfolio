@@ -12,6 +12,7 @@ import FixedExhibit from "./FixedExhibit";
 import Hero from "./Hero";
 import Skills from "./Skills";
 import { audio } from "../lib/audio";
+import { useAudio } from "./AudioProvider";
 
 const FeaturedProjects = dynamic(() => import("./FeaturedProjects"), {
   loading: () => (
@@ -125,31 +126,15 @@ export default function PortfolioShell() {
   const [bootComplete, setBootComplete] = useState(false);
   const [minimumElapsed, setMinimumElapsed] = useState(false);
   const [robotReady, setRobotReady] = useState(false);
-  const [soundEnabled, setSoundEnabled] = useState(true);
   const [themeMode, setThemeMode] = useState<ThemeMode>("dark");
   const [themeFlash, setThemeFlash] = useState(false);
+
+  const { isMuted, toggleMute } = useAudio();
 
   const robotFinish = themeMode === "light" ? "light" : "dark";
   const canReveal = reduceMotion || (minimumElapsed && robotReady);
 
   useSectionReveal(bootComplete);
-
-  // Sync sound setting on load
-  useEffect(() => {
-    if (audio) {
-      setSoundEnabled(!audio.isMuted());
-    }
-  }, []);
-
-  const toggleSound = useCallback(() => {
-    if (audio) {
-      const nextMuted = audio.toggleMute();
-      setSoundEnabled(!nextMuted);
-      if (!nextMuted) {
-        audio.play("uiClick");
-      }
-    }
-  }, []);
 
   const toggleTheme = useCallback(() => {
     audio?.play("themeShift");
@@ -180,24 +165,8 @@ export default function PortfolioShell() {
     document.documentElement.classList.add("boot-lock");
     const timer = window.setTimeout(() => setMinimumElapsed(true), 3400);
 
-    // Trigger boot sequence sounds
-    const t1 = setTimeout(() => {
-      audio?.play("bootHum");
-    }, 800);
-
-    const t2 = setTimeout(() => {
-      audio?.play("servoStart");
-    }, 1400);
-
-    const t3 = setTimeout(() => {
-      audio?.play("metalLock");
-    }, 2000);
-
     return () => {
       window.clearTimeout(timer);
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-      window.clearTimeout(t3);
       document.documentElement.classList.remove("boot-lock");
     };
   }, [reduceMotion]);
@@ -208,19 +177,6 @@ export default function PortfolioShell() {
     setBootComplete(true);
     document.documentElement.classList.remove("boot-lock");
   }, [canReveal]);
-
-  /* Unlock Howler on first user interaction */
-  useEffect(() => {
-    const unlock = () => {
-      audio?.unlock();
-    };
-    window.addEventListener("pointerdown", unlock, { once: true });
-    window.addEventListener("keydown", unlock, { once: true });
-    return () => {
-      window.removeEventListener("pointerdown", unlock);
-      window.removeEventListener("keydown", unlock);
-    };
-  }, []);
 
   /* Nav hover / click SFX */
   const handleNavHover = useCallback(() => audio?.play("uiHover"), []);
@@ -247,8 +203,8 @@ export default function PortfolioShell() {
             isReady={bootComplete}
             onRobotReady={() => setRobotReady(true)}
             onStage={() => {}}
-            onToggleSound={toggleSound}
-            soundEnabled={soundEnabled}
+            onToggleSound={toggleMute}
+            soundEnabled={!isMuted}
           />
         ) : null}
       </AnimatePresence>
@@ -288,13 +244,13 @@ export default function PortfolioShell() {
               ◐
             </button>
             <button
-              aria-label={soundEnabled ? "Mute sound" : "Unmute sound"}
+              aria-label={isMuted ? "Unmute sound" : "Mute sound"}
               className="cta-btn hidden h-11 w-11 items-center justify-center border border-exhibit-blue/35 text-exhibit-silver transition hover:border-exhibit-red hover:text-[var(--text-primary)] sm:flex"
-              onClick={toggleSound}
-              title={soundEnabled ? "Sound On" : "Sound Off"}
+              onClick={toggleMute}
+              title={isMuted ? "Sound Off" : "Sound On"}
               type="button"
             >
-              {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+              {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
             </button>
             <a
               className="nav-resume-glow cta-btn flex h-11 items-center justify-center border border-exhibit-red/45 px-4 font-display text-[0.68rem] font-bold uppercase tracking-[0.22em] text-exhibit-silver transition-all duration-200 hover:scale-[1.03] hover:border-exhibit-red hover:bg-exhibit-red/10 hover:text-[var(--text-primary)] active:scale-[0.97]"
