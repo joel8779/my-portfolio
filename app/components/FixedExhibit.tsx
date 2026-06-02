@@ -236,7 +236,7 @@ export default function FixedExhibit({ finish = "dark" }: Pick<RobotProps, "fini
   const { scrollYProgress } = useScroll();
   const exhibitX = useTransform(scrollYProgress, [0, 0.2, 0.4, 0.7, 1], ["0vw", "0vw", "-18vw", "-27vw", "-27vw"]);
   const exhibitScale = useTransform(scrollYProgress, [0, 0.2, 0.4, 1], [1, 1, 0.88, 0.88]);
-  const opacity = useTransform(scrollYProgress, [0, 0.15, 0.35, 1], [0.92, 0.92, 0.74, 0.62]);
+  const opacity = useTransform(scrollYProgress, [0, 0.15, 0.35, 1], [0.98, 0.98, 0.80, 0.68]);
   const y = useTransform(scrollYProgress, [0, 0.7, 1], [-0.5, -0.46, -0.46]);
   const rotateY = useTransform(scrollYProgress, [0, 0.7, 1], [-0.08, -0.08, Math.PI]);
   const cameraY = useTransform(scrollYProgress, [0, 1], [-0.2, -0.12]);
@@ -287,6 +287,7 @@ export default function FixedExhibit({ finish = "dark" }: Pick<RobotProps, "fini
         scale: exhibitScale,
         transformOrigin: "bottom center",
         x: exhibitX,
+        marginLeft: 24,
       }}
     >
       <Canvas
