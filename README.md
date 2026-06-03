@@ -1,5 +1,8 @@
 # Cinematic Engineering Portfolio
 
+[![Build Status](https://github.com/joel8779/my-portfolio/actions/workflows/nextjs.yml/badge.svg)](https://github.com/joel8779/my-portfolio/actions/workflows/nextjs.yml)
+[![Last Commit](https://img.shields.io/github/last-commit/joel8779/my-portfolio)](https://github.com/joel8779/my-portfolio/commits/main)
+
 > **Interactive 3D Exhibit Developer Website** — Procedural WebGL mechanics, Framer Motion scroll bindings, and spatial sound design.
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Vercel-teal?style=flat-square&logo=vercel)](https://my-portfolio-ten-green-65.vercel.app/)
