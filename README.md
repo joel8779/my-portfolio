@@ -25,7 +25,6 @@ This is an interactive developer portfolio designed as a 3D cinematic museum exh
 
 ## ✨ Features
 
-*   **Cinematic Audio Boot Sequence**: Automatically binds and unlocks the Web Audio API context on the first user interaction (`pointerdown`, `keydown`, etc.), playing an initialization startup sound exactly once per session.
 *   **Procedural 3D Robot Exhibit**: Constructed in a WebGL canvas using `@react-three/fiber` mesh primitives. Responds to page scroll by translating position, rotating, scaling, and triggering spatial audio cues.
 *   **Audio Controller**: Custom global Audio Provider with session persistence (`localStorage`) allowing users to mute or toggle interface sound design.
 *   **Dynamic Repository Archive**: Integrates a client-side proxy route fetching active repository metrics directly from the GitHub GraphQL API with caching controls.
