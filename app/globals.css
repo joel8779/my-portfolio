@@ -953,3 +953,130 @@ body::after {
     padding: 24px;
   }
 }
+
+/* ── Certifications Section ── */
+#certifications.section-shell {
+  min-height: auto !important;
+  padding-top: 96px !important;
+  padding-bottom: 96px !important;
+}
+
+.cert-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(420px, 100%), 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.cert-card {
+  position: relative;
+  overflow: hidden;
+  background: rgba(4, 8, 20, 0.45) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid var(--red-border) !important;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.02) !important;
+  transition: transform 350ms cubic-bezier(.22,1,.36,1), 
+              border-color 350ms cubic-bezier(.22,1,.36,1), 
+              box-shadow 350ms cubic-bezier(.22,1,.36,1) !important;
+}
+
+.cert-card:hover {
+  transform: translateY(-8px) scale(1.01) !important;
+  border-color: rgba(200, 16, 46, 0.6) !important;
+  box-shadow: 0 20px 40px rgba(200, 16, 46, 0.15), 
+              0 0 20px rgba(200, 16, 46, 0.1),
+              inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+:root[data-theme="light"] .cert-card {
+  background: rgba(255, 255, 255, 0.6) !important;
+  border-color: var(--red-border) !important;
+  box-shadow: 0 16px 50px rgba(10, 27, 68, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+}
+
+:root[data-theme="light"] .cert-card:hover {
+  border-color: rgba(179, 0, 34, 0.5) !important;
+  box-shadow: 0 20px 40px rgba(179, 0, 34, 0.08), 
+              0 0 20px rgba(179, 0, 34, 0.04),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+}
+
+.cert-meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  border-top: 1px solid rgba(232, 237, 245, 0.06);
+  border-bottom: 1px solid rgba(232, 237, 245, 0.06);
+  padding: 0.75rem 0;
+  margin: 1rem 0;
+}
+
+:root[data-theme="light"] .cert-meta {
+  border-top-color: rgba(10, 27, 68, 0.06);
+  border-bottom-color: rgba(10, 27, 68, 0.06);
+}
+
+.cert-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.cert-meta-label {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.cert-meta-value {
+  font-family: var(--font-rajdhani), sans-serif;
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.verify-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(200, 16, 46, 0.06) !important;
+  border: 1px solid rgba(200, 16, 46, 0.3) !important;
+  color: var(--text-primary) !important;
+  font-family: var(--font-rajdhani), sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.6rem 1rem;
+  transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease, box-shadow 200ms ease !important;
+  cursor: pointer;
+  width: 100%;
+}
+
+.verify-btn:hover {
+  background: rgba(200, 16, 46, 0.15) !important;
+  border-color: rgba(200, 16, 46, 0.8) !important;
+  color: white !important;
+  animation: pulse-border 1.5s infinite alternate;
+}
+
+:root[data-theme="light"] .verify-btn {
+  background: rgba(179, 0, 34, 0.04) !important;
+  border-color: rgba(179, 0, 34, 0.25) !important;
+  color: #c8102e !important;
+}
+
+:root[data-theme="light"] .verify-btn:hover {
+  background: rgba(179, 0, 34, 0.08) !important;
+  border-color: rgba(179, 0, 34, 0.7) !important;
+  color: #c8102e !important;
+  animation: pulse-border-light 1.5s infinite alternate;
+}
+

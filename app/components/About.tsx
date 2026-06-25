@@ -10,12 +10,20 @@ export default function About() {
             <p className="font-display text-xs font-semibold uppercase tracking-[0.24em] text-exhibit-red/85 mt-2">
               Systems • Backend • AI
             </p>
-            <p className="fine-text mt-6" style={{ maxWidth: "620px", lineHeight: 1.9 }}>
-              I build backends that do more than serve data. My work focuses on the
-              intersection of distributed systems and machine intelligence, including
-              RAG architectures, vector databases, semantic search, and multi-tenant
-              enterprise platforms.
-            </p>
+            <div className="fine-text mt-6 flex flex-col gap-4" style={{ maxWidth: "620px", lineHeight: 1.9 }}>
+              <p>
+                I build intelligent systems—not just applications.
+              </p>
+              <p>
+                My work spans machine learning, backend engineering,
+                LLM workflows, and production-grade data platforms.
+              </p>
+              <p>
+                Recently, I’ve been building AutoML pipelines,
+                training orchestration, model observability,
+                and AI-powered developer tooling.
+              </p>
+            </div>
           </div>
 
           {/* Right: profile panel */}
@@ -39,8 +47,8 @@ export default function About() {
             {[
               ["NAME", "ALLURI JESWANTH JOEL"],
               ["INSTITUTE", "IIIT Kottayam, Kerala"],
-              ["PROGRAM", "B.Tech CSE"],
-              ["PERIOD", "Nov 2022 — May 2026"],
+              ["DEGREE", "B.Tech — Computer Science Engineering"],
+              ["GRADUATED", "May 2026"],
             ].map(([label, value]) => (
               <div className="about-row" key={label}>
                 <span className="about-label">{label}</span>
@@ -48,23 +56,11 @@ export default function About() {
               </div>
             ))}
 
-            {/* Multi-value: Certifications */}
-            <div className="about-row items-start">
-              <span className="about-label mt-1">CERTIFICATIONS</span>
-              <div className="flex flex-col gap-1.5 items-end max-w-[70%] text-right">
-                {["Google Cloud Study Jam 2023", "AlgoUniversity Graph Camp 2024"].map((cert) => (
-                  <span key={cert} className="about-chip">
-                    {cert}
-                  </span>
-                ))}
-              </div>
-            </div>
-
             {/* Multi-value: Focus */}
             <div className="about-row items-start">
               <span className="about-label mt-1">FOCUS</span>
               <div className="flex flex-col gap-1.5 items-end max-w-[70%] text-right">
-                {["AI Systems", "Backend Architecture", "Distributed Systems"].map((focus) => (
+                {["AI ENGINEERING", "ML SYSTEMS", "BACKEND SYSTEMS"].map((focus) => (
                   <span key={focus} className="about-chip">
                     {focus}
                   </span>

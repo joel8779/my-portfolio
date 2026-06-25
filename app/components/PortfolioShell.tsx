@@ -5,6 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Volume2, VolumeX } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import About from "./About";
+import Certifications from "./Certifications";
 import Contact from "./Contact";
 import CustomCursor from "./CustomCursor";
 import Hero from "./Hero";
@@ -42,10 +43,9 @@ const RepositoryArchive = dynamic(() => import("./RepositoryArchive"), {
 });
 
 const navItems = [
-  ["Projects", "#projects"],
-  ["Repos", "#repos"],
-  ["Skills", "#skills"],
   ["About", "#about"],
+  ["Projects", "#projects"],
+  ["Knowledge", "#certifications"],
   ["Contact", "#contact"],
 ];
 
@@ -86,6 +86,7 @@ function useSectionReveal(bootComplete: boolean) {
             if (id === "repos") audio?.play("repoScan", 0.08);
             if (id === "skills") audio?.play("themeShift", 0.08);
             if (id === "about") audio?.play("bootHum", 0.1);
+            if (id === "certifications") audio?.play("themeShift", 0.08);
             if (id === "contact") audio?.play("uiHover", 0.12);
             sectionObserver.unobserve(entry.target);
           }
@@ -275,10 +276,11 @@ export default function PortfolioShell() {
           transition={{ duration: reduceMotion ? 0 : 0.45 }}
         >
           <Hero />
+          <About />
           <FeaturedProjects />
           <RepositoryArchive />
           <Skills />
-          <About />
+          <Certifications />
           <Contact />
         </motion.main>
       ) : null}
